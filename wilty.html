@@ -3,7 +3,7 @@
 <html lang="en">
 <head><meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>wilty</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>Notebook</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <style type="text/css">
     pre { line-height: 125%; }
 td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
@@ -7509,595 +7509,357 @@ a.anchor-link {
 </style>
 <!-- End of mermaid configuration --></head>
 <body class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
-<main>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Scrape the Home Truths and Quick Fire Lies from the WILTY fandom site</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [1]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">requests</span>
-<span class="kn">from</span> <span class="nn">bs4</span> <span class="kn">import</span> <span class="n">BeautifulSoup</span>
-
-<span class="k">def</span> <span class="nf">scrape_episode</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
-    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
-    <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="s1">'html.parser'</span><span class="p">)</span>
-
-    <span class="c1"># Extract truths and lies only from Quick-Fire Lies and Home Truths</span>
-    <span class="n">rounds</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s1">'span'</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="p">[</span><span class="s1">'Home_Truths'</span><span class="p">,</span> <span class="s1">'Quick-Fire_Lies'</span><span class="p">])</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">rounds</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">[],</span> <span class="kc">None</span>
-
-    <span class="n">truths_and_lies</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="k">for</span> <span class="n">round_section</span> <span class="ow">in</span> <span class="n">rounds</span><span class="p">:</span>
-        <span class="n">statements</span> <span class="o">=</span> <span class="n">round_section</span><span class="o">.</span><span class="n">find_parent</span><span class="p">(</span><span class="s1">'h3'</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">statements</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">statements</span> <span class="o">=</span> <span class="n">round_section</span><span class="o">.</span><span class="n">find_parent</span><span class="p">(</span><span class="s1">'h2'</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">li</span> <span class="ow">in</span> <span class="n">statements</span><span class="o">.</span><span class="n">find_next_sibling</span><span class="p">(</span><span class="s1">'ul'</span><span class="p">)</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s1">'li'</span><span class="p">):</span>
-            <span class="n">text</span> <span class="o">=</span> <span class="n">li</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="n">truth_value</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="s1">'color="green"'</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">li</span><span class="p">)</span> <span class="k">else</span> <span class="kc">False</span>  <span class="c1"># Boolean conversion</span>
-            <span class="n">truths_and_lies</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">text</span><span class="p">,</span> <span class="n">truth_value</span><span class="p">))</span>
-
-    <span class="c1"># Find the next page link</span>
-    <span class="n">next_page_link</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">select_one</span><span class="p">(</span><span class="s1">'.infobox &gt; tbody:nth-child(1) &gt; tr:last-child &gt; td:nth-child(2) &gt; a'</span><span class="p">)</span>
-    <span class="n">next_page_url</span> <span class="o">=</span> <span class="s1">'https://wilty.fandom.com'</span> <span class="o">+</span> <span class="n">next_page_link</span><span class="p">[</span><span class="s1">'href'</span><span class="p">]</span> <span class="k">if</span> <span class="n">next_page_link</span> <span class="k">else</span> <span class="kc">None</span>
-    
-    <span class="k">return</span> <span class="n">truths_and_lies</span><span class="p">,</span> <span class="n">next_page_url</span>
-
-<span class="c1"># Initial page URL</span>
-<span class="n">base_url</span> <span class="o">=</span> <span class="s1">'https://wilty.fandom.com/wiki/Series_1,_Episode_1'</span>
-
-<span class="c1"># Main scraping logic</span>
-<span class="n">current_url</span> <span class="o">=</span> <span class="n">base_url</span>
-<span class="n">all_data</span> <span class="o">=</span> <span class="p">[]</span>
-
-<span class="n">data</span><span class="p">,</span> <span class="n">next_url</span> <span class="o">=</span> <span class="n">scrape_episode</span><span class="p">(</span><span class="n">current_url</span><span class="p">)</span>
-
-<span class="k">while</span> <span class="n">current_url</span><span class="p">:</span>
-    <span class="n">data</span><span class="p">,</span> <span class="n">next_url</span> <span class="o">=</span> <span class="n">scrape_episode</span><span class="p">(</span><span class="n">current_url</span><span class="p">)</span>
-    <span class="n">all_data</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Scraped </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s2"> entries from </span><span class="si">{</span><span class="n">current_url</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-    <span class="n">current_url</span> <span class="o">=</span> <span class="n">next_url</span> <span class="k">if</span> <span class="n">next_url</span> <span class="k">else</span> <span class="kc">None</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Scraping completed."</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
+<main><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput">
 <div class="jp-Cell-outputWrapper">
 <div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Requirement already satisfied: requests in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (2.31.0)
+Requirement already satisfied: bs4 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (0.0.2)
+Requirement already satisfied: sklearn in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (0.0)
+Requirement already satisfied: joblib in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (1.2.0)
+Requirement already satisfied: lime in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (0.2.0.1)
+Requirement already satisfied: mercury in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (2.3.10)
+Requirement already satisfied: charset-normalizer&lt;4,&gt;=2 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from requests) (2.1.1)
+Requirement already satisfied: idna&lt;4,&gt;=2.5 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from requests) (3.4)
+Requirement already satisfied: urllib3&lt;3,&gt;=1.21.1 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from requests) (1.26.13)
+Requirement already satisfied: certifi&gt;=2017.4.17 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from requests) (2022.12.7)
+Requirement already satisfied: beautifulsoup4 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from bs4) (4.12.2)
+Requirement already satisfied: scikit-learn in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from sklearn) (1.1.2)
+Requirement already satisfied: matplotlib in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from lime) (3.6.2)
+Requirement already satisfied: numpy in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from lime) (1.23.4)
+Requirement already satisfied: scipy in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from lime) (1.9.1)
+Requirement already satisfied: tqdm in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from lime) (4.64.1)
+Requirement already satisfied: scikit-image&gt;=0.12 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from lime) (0.23.1)
+Requirement already satisfied: django==4.2.3 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from mercury) (4.2.3)
+Requirement already satisfied: djangorestframework==3.14.0 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from mercury) (3.14.0)
+Requirement already satisfied: django-filter==21.1 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from mercury) (21.1)
+Requirement already satisfied: markdown==3.3.6 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from mercury) (3.3.6)
+Requirement already satisfied: celery&gt;=5.1.2 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from mercury) (5.3.6)
+Requirement already satisfied: sqlalchemy==1.4.27 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from mercury) (1.4.27)
+Requirement already satisfied: gevent in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from mercury) (24.2.1)
+Requirement already satisfied: nbconvert&gt;=7.8.0 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from mercury) (7.16.3)
+Requirement already satisfied: ipython-genutils in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from mercury) (0.2.0)
+Requirement already satisfied: django-cors-headers==3.10.1 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from mercury) (3.10.1)
+Requirement already satisfied: ipython&gt;=7.30.1 in c:\users\emily\appdata\roaming\python\python310\site-packages (from mercury) (8.22.1)
+Requirement already satisfied: ipykernel&gt;=6.6.0 in c:\users\emily\appdata\roaming\python\python310\site-packages (from mercury) (6.29.3)
+Requirement already satisfied: psutil&gt;=5.8.0 in c:\users\emily\appdata\roaming\python\python310\site-packages (from mercury) (5.9.8)
+Requirement already satisfied: whitenoise&gt;=5.3.0 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from mercury) (6.6.0)
+Requirement already satisfied: python-dotenv&gt;=0.19.2 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from mercury) (1.0.1)
+Requirement already satisfied: django-drf-filepond==0.4.1 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from mercury) (0.4.1)
+Requirement already satisfied: croniter&gt;=1.3.5 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from mercury) (2.0.3)
+Requirement already satisfied: pyppeteer==1.0.2 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from mercury) (1.0.2)
+Requirement already satisfied: channels&gt;=4.0.0 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from channels[daphne]&gt;=4.0.0-&gt;mercury) (4.1.0)
+Requirement already satisfied: websocket-client&gt;=1.4.2 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from mercury) (1.7.0)
+Requirement already satisfied: execnb in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from mercury) (0.1.5)
+Requirement already satisfied: ipywidgets==8.0.3 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from mercury) (8.0.3)
+Requirement already satisfied: dj-rest-auth==3.0.0 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from dj-rest-auth[with_social]==3.0.0-&gt;mercury) (3.0.0)
+Requirement already satisfied: boto3==1.26.83 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from mercury) (1.26.83)
+Requirement already satisfied: cryptography in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from mercury) (42.0.5)
+Requirement already satisfied: pyopenssl&gt;=23.1.1 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from mercury) (24.1.0)
+Requirement already satisfied: bleach&gt;=6.0.0 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from mercury) (6.1.0)
+Requirement already satisfied: itables&gt;=2.0.0 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from mercury) (2.0.0)
+Requirement already satisfied: botocore&lt;1.30.0,&gt;=1.29.83 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from boto3==1.26.83-&gt;mercury) (1.29.165)
+Requirement already satisfied: jmespath&lt;2.0.0,&gt;=0.7.1 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from boto3==1.26.83-&gt;mercury) (1.0.1)
+Requirement already satisfied: s3transfer&lt;0.7.0,&gt;=0.6.0 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from boto3==1.26.83-&gt;mercury) (0.6.2)
+Requirement already satisfied: django-allauth&lt;0.53.0,&gt;=0.40.0 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from dj-rest-auth[with_social]==3.0.0-&gt;mercury) (0.52.0)
+Requirement already satisfied: asgiref&lt;4,&gt;=3.6.0 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from django==4.2.3-&gt;mercury) (3.8.1)
+Requirement already satisfied: sqlparse&gt;=0.3.1 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from django==4.2.3-&gt;mercury) (0.5.0)
+Requirement already satisfied: tzdata in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from django==4.2.3-&gt;mercury) (2024.1)
+Requirement already satisfied: six&gt;=1.14.0 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from django-drf-filepond==0.4.1-&gt;mercury) (1.16.0)
+Requirement already satisfied: shortuuid&gt;=0.5.0 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from django-drf-filepond==0.4.1-&gt;mercury) (1.0.13)
+Requirement already satisfied: django-storages&gt;=1.9.1 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from django-drf-filepond==0.4.1-&gt;mercury) (1.14.2)
+Requirement already satisfied: pytz in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from djangorestframework==3.14.0-&gt;mercury) (2022.2.1)
+Requirement already satisfied: traitlets&gt;=4.3.1 in c:\users\emily\appdata\roaming\python\python310\site-packages (from ipywidgets==8.0.3-&gt;mercury) (5.14.1)
+Requirement already satisfied: widgetsnbextension~=4.0 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from ipywidgets==8.0.3-&gt;mercury) (4.0.10)
+Requirement already satisfied: jupyterlab-widgets~=3.0 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from ipywidgets==8.0.3-&gt;mercury) (3.0.10)
+Requirement already satisfied: appdirs&lt;2.0.0,&gt;=1.4.3 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from pyppeteer==1.0.2-&gt;mercury) (1.4.4)
+Requirement already satisfied: importlib-metadata&gt;=1.4 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from pyppeteer==1.0.2-&gt;mercury) (7.1.0)
+Requirement already satisfied: pyee&lt;9.0.0,&gt;=8.1.0 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from pyppeteer==1.0.2-&gt;mercury) (8.2.2)
+Requirement already satisfied: websockets&lt;11.0,&gt;=10.0 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from pyppeteer==1.0.2-&gt;mercury) (10.4)
+Requirement already satisfied: greenlet!=0.4.17 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from sqlalchemy==1.4.27-&gt;mercury) (3.0.3)
+Requirement already satisfied: webencodings in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from bleach&gt;=6.0.0-&gt;mercury) (0.5.1)
+Requirement already satisfied: billiard&lt;5.0,&gt;=4.2.0 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from celery&gt;=5.1.2-&gt;mercury) (4.2.0)
+Requirement already satisfied: click-didyoumean&gt;=0.3.0 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from celery&gt;=5.1.2-&gt;mercury) (0.3.1)
+Requirement already satisfied: click-plugins&gt;=1.1.1 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from celery&gt;=5.1.2-&gt;mercury) (1.1.1)
+Requirement already satisfied: click-repl&gt;=0.2.0 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from celery&gt;=5.1.2-&gt;mercury) (0.3.0)
+Requirement already satisfied: click&lt;9.0,&gt;=8.1.2 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from celery&gt;=5.1.2-&gt;mercury) (8.1.7)
+Requirement already satisfied: kombu&lt;6.0,&gt;=5.3.4 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from celery&gt;=5.1.2-&gt;mercury) (5.3.7)
+Requirement already satisfied: python-dateutil&gt;=2.8.2 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from celery&gt;=5.1.2-&gt;mercury) (2.8.2)
+Requirement already satisfied: vine&lt;6.0,&gt;=5.1.0 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from celery&gt;=5.1.2-&gt;mercury) (5.1.0)
+Requirement already satisfied: daphne&gt;=4.0.0 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from channels[daphne]&gt;=4.0.0-&gt;mercury) (4.1.2)
+Requirement already satisfied: comm&gt;=0.1.1 in c:\users\emily\appdata\roaming\python\python310\site-packages (from ipykernel&gt;=6.6.0-&gt;mercury) (0.2.1)
+Requirement already satisfied: debugpy&gt;=1.6.5 in c:\users\emily\appdata\roaming\python\python310\site-packages (from ipykernel&gt;=6.6.0-&gt;mercury) (1.8.1)
+Requirement already satisfied: jupyter-client&gt;=6.1.12 in c:\users\emily\appdata\roaming\python\python310\site-packages (from ipykernel&gt;=6.6.0-&gt;mercury) (8.6.0)
+Requirement already satisfied: jupyter-core!=5.0.*,&gt;=4.12 in c:\users\emily\appdata\roaming\python\python310\site-packages (from ipykernel&gt;=6.6.0-&gt;mercury) (5.7.1)
+Requirement already satisfied: matplotlib-inline&gt;=0.1 in c:\users\emily\appdata\roaming\python\python310\site-packages (from ipykernel&gt;=6.6.0-&gt;mercury) (0.1.6)
+Requirement already satisfied: nest-asyncio in c:\users\emily\appdata\roaming\python\python310\site-packages (from ipykernel&gt;=6.6.0-&gt;mercury) (1.6.0)
+Requirement already satisfied: packaging in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from ipykernel&gt;=6.6.0-&gt;mercury) (24.0)
+Requirement already satisfied: pyzmq&gt;=24 in c:\users\emily\appdata\roaming\python\python310\site-packages (from ipykernel&gt;=6.6.0-&gt;mercury) (25.1.2)
+Requirement already satisfied: tornado&gt;=6.1 in c:\users\emily\appdata\roaming\python\python310\site-packages (from ipykernel&gt;=6.6.0-&gt;mercury) (6.4)
+Requirement already satisfied: decorator in c:\users\emily\appdata\roaming\python\python310\site-packages (from ipython&gt;=7.30.1-&gt;mercury) (5.1.1)
+Requirement already satisfied: jedi&gt;=0.16 in c:\users\emily\appdata\roaming\python\python310\site-packages (from ipython&gt;=7.30.1-&gt;mercury) (0.19.1)
+Requirement already satisfied: prompt-toolkit&lt;3.1.0,&gt;=3.0.41 in c:\users\emily\appdata\roaming\python\python310\site-packages (from ipython&gt;=7.30.1-&gt;mercury) (3.0.43)
+Requirement already satisfied: pygments&gt;=2.4.0 in c:\users\emily\appdata\roaming\python\python310\site-packages (from ipython&gt;=7.30.1-&gt;mercury) (2.17.2)
+Requirement already satisfied: stack-data in c:\users\emily\appdata\roaming\python\python310\site-packages (from ipython&gt;=7.30.1-&gt;mercury) (0.6.3)
+Requirement already satisfied: exceptiongroup in c:\users\emily\appdata\roaming\python\python310\site-packages (from ipython&gt;=7.30.1-&gt;mercury) (1.2.0)
+Requirement already satisfied: colorama in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from ipython&gt;=7.30.1-&gt;mercury) (0.4.6)
+Requirement already satisfied: pandas in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from itables&gt;=2.0.0-&gt;mercury) (1.5.0)
+Requirement already satisfied: defusedxml in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from nbconvert&gt;=7.8.0-&gt;mercury) (0.7.1)
+Requirement already satisfied: jinja2&gt;=3.0 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from nbconvert&gt;=7.8.0-&gt;mercury) (3.1.3)
+Requirement already satisfied: jupyterlab-pygments in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from nbconvert&gt;=7.8.0-&gt;mercury) (0.3.0)
+Requirement already satisfied: markupsafe&gt;=2.0 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from nbconvert&gt;=7.8.0-&gt;mercury) (2.1.5)
+Requirement already satisfied: mistune&lt;4,&gt;=2.0.3 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from nbconvert&gt;=7.8.0-&gt;mercury) (3.0.2)
+Requirement already satisfied: nbclient&gt;=0.5.0 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from nbconvert&gt;=7.8.0-&gt;mercury) (0.10.0)
+Requirement already satisfied: nbformat&gt;=5.7 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from nbconvert&gt;=7.8.0-&gt;mercury) (5.10.4)
+Requirement already satisfied: pandocfilters&gt;=1.4.1 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from nbconvert&gt;=7.8.0-&gt;mercury) (1.5.1)
+Requirement already satisfied: tinycss2 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from nbconvert&gt;=7.8.0-&gt;mercury) (1.2.1)
+Requirement already satisfied: cffi&gt;=1.12 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from cryptography-&gt;mercury) (1.16.0)
+Requirement already satisfied: networkx&gt;=2.8 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from scikit-image&gt;=0.12-&gt;lime) (3.3)
+Requirement already satisfied: pillow&gt;=9.1 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from scikit-image&gt;=0.12-&gt;lime) (9.3.0)
+Requirement already satisfied: imageio&gt;=2.33 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from scikit-image&gt;=0.12-&gt;lime) (2.34.0)
+Requirement already satisfied: tifffile&gt;=2022.8.12 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from scikit-image&gt;=0.12-&gt;lime) (2024.2.12)
+Requirement already satisfied: lazy-loader&gt;=0.4 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from scikit-image&gt;=0.12-&gt;lime) (0.4)
+Requirement already satisfied: threadpoolctl&gt;=2.0.0 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from scikit-learn-&gt;sklearn) (3.1.0)
+Requirement already satisfied: soupsieve&gt;1.2 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from beautifulsoup4-&gt;bs4) (2.4.1)
+Requirement already satisfied: fastcore&gt;=1.5.5 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from execnb-&gt;mercury) (1.5.29)
+Requirement already satisfied: zope.event in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from gevent-&gt;mercury) (5.0)
+Requirement already satisfied: zope.interface in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from gevent-&gt;mercury) (6.3)
+Requirement already satisfied: contourpy&gt;=1.0.1 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from matplotlib-&gt;lime) (1.0.6)
+Requirement already satisfied: cycler&gt;=0.10 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from matplotlib-&gt;lime) (0.11.0)
+Requirement already satisfied: fonttools&gt;=4.22.0 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from matplotlib-&gt;lime) (4.38.0)
+Requirement already satisfied: kiwisolver&gt;=1.0.1 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from matplotlib-&gt;lime) (1.4.4)
+Requirement already satisfied: pyparsing&gt;=2.2.1 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from matplotlib-&gt;lime) (3.0.9)
+Requirement already satisfied: typing-extensions&gt;=4 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from asgiref&lt;4,&gt;=3.6.0-&gt;django==4.2.3-&gt;mercury) (4.4.0)
+Requirement already satisfied: pycparser in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from cffi&gt;=1.12-&gt;cryptography-&gt;mercury) (2.22)
+Requirement already satisfied: autobahn&gt;=22.4.2 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from daphne&gt;=4.0.0-&gt;channels[daphne]&gt;=4.0.0-&gt;mercury) (23.6.2)
+Requirement already satisfied: twisted&gt;=22.4 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from twisted[tls]&gt;=22.4-&gt;daphne&gt;=4.0.0-&gt;channels[daphne]&gt;=4.0.0-&gt;mercury) (24.3.0)
+Requirement already satisfied: python3-openid&gt;=3.0.8 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from django-allauth&lt;0.53.0,&gt;=0.40.0-&gt;dj-rest-auth[with_social]==3.0.0-&gt;mercury) (3.2.0)
+Requirement already satisfied: requests-oauthlib&gt;=0.3.0 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from django-allauth&lt;0.53.0,&gt;=0.40.0-&gt;dj-rest-auth[with_social]==3.0.0-&gt;mercury) (2.0.0)
+Requirement already satisfied: pyjwt&gt;=1.7 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from pyjwt[crypto]&gt;=1.7-&gt;django-allauth&lt;0.53.0,&gt;=0.40.0-&gt;dj-rest-auth[with_social]==3.0.0-&gt;mercury) (2.8.0)
+Requirement already satisfied: pip in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from fastcore&gt;=1.5.5-&gt;execnb-&gt;mercury) (24.0)
+Requirement already satisfied: zipp&gt;=0.5 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from importlib-metadata&gt;=1.4-&gt;pyppeteer==1.0.2-&gt;mercury) (3.18.1)
+Requirement already satisfied: parso&lt;0.9.0,&gt;=0.8.3 in c:\users\emily\appdata\roaming\python\python310\site-packages (from jedi&gt;=0.16-&gt;ipython&gt;=7.30.1-&gt;mercury) (0.8.3)
+Requirement already satisfied: platformdirs&gt;=2.5 in c:\users\emily\appdata\roaming\python\python310\site-packages (from jupyter-core!=5.0.*,&gt;=4.12-&gt;ipykernel&gt;=6.6.0-&gt;mercury) (4.2.0)
+Requirement already satisfied: pywin32&gt;=300 in c:\users\emily\appdata\roaming\python\python310\site-packages (from jupyter-core!=5.0.*,&gt;=4.12-&gt;ipykernel&gt;=6.6.0-&gt;mercury) (306)
+Requirement already satisfied: amqp&lt;6.0.0,&gt;=5.1.1 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from kombu&lt;6.0,&gt;=5.3.4-&gt;celery&gt;=5.1.2-&gt;mercury) (5.2.0)
+Requirement already satisfied: fastjsonschema&gt;=2.15 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from nbformat&gt;=5.7-&gt;nbconvert&gt;=7.8.0-&gt;mercury) (2.19.1)
+Requirement already satisfied: jsonschema&gt;=2.6 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from nbformat&gt;=5.7-&gt;nbconvert&gt;=7.8.0-&gt;mercury) (4.21.1)
+Requirement already satisfied: wcwidth in c:\users\emily\appdata\roaming\python\python310\site-packages (from prompt-toolkit&lt;3.1.0,&gt;=3.0.41-&gt;ipython&gt;=7.30.1-&gt;mercury) (0.2.13)
+Requirement already satisfied: executing&gt;=1.2.0 in c:\users\emily\appdata\roaming\python\python310\site-packages (from stack-data-&gt;ipython&gt;=7.30.1-&gt;mercury) (2.0.1)
+Requirement already satisfied: asttokens&gt;=2.1.0 in c:\users\emily\appdata\roaming\python\python310\site-packages (from stack-data-&gt;ipython&gt;=7.30.1-&gt;mercury) (2.4.1)
+Requirement already satisfied: pure-eval in c:\users\emily\appdata\roaming\python\python310\site-packages (from stack-data-&gt;ipython&gt;=7.30.1-&gt;mercury) (0.2.2)
+Requirement already satisfied: setuptools in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from zope.event-&gt;gevent-&gt;mercury) (63.2.0)
+Requirement already satisfied: txaio&gt;=21.2.1 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from autobahn&gt;=22.4.2-&gt;daphne&gt;=4.0.0-&gt;channels[daphne]&gt;=4.0.0-&gt;mercury) (23.1.1)
+Requirement already satisfied: hyperlink&gt;=21.0.0 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from autobahn&gt;=22.4.2-&gt;daphne&gt;=4.0.0-&gt;channels[daphne]&gt;=4.0.0-&gt;mercury) (21.0.0)
+Requirement already satisfied: attrs&gt;=22.2.0 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from jsonschema&gt;=2.6-&gt;nbformat&gt;=5.7-&gt;nbconvert&gt;=7.8.0-&gt;mercury) (23.2.0)
+Requirement already satisfied: jsonschema-specifications&gt;=2023.03.6 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from jsonschema&gt;=2.6-&gt;nbformat&gt;=5.7-&gt;nbconvert&gt;=7.8.0-&gt;mercury) (2023.12.1)
+Requirement already satisfied: referencing&gt;=0.28.4 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from jsonschema&gt;=2.6-&gt;nbformat&gt;=5.7-&gt;nbconvert&gt;=7.8.0-&gt;mercury) (0.34.0)
+Requirement already satisfied: rpds-py&gt;=0.7.1 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from jsonschema&gt;=2.6-&gt;nbformat&gt;=5.7-&gt;nbconvert&gt;=7.8.0-&gt;mercury) (0.18.0)
+Requirement already satisfied: oauthlib&gt;=3.0.0 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from requests-oauthlib&gt;=0.3.0-&gt;django-allauth&lt;0.53.0,&gt;=0.40.0-&gt;dj-rest-auth[with_social]==3.0.0-&gt;mercury) (3.2.2)
+Requirement already satisfied: automat&gt;=0.8.0 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from twisted&gt;=22.4-&gt;twisted[tls]&gt;=22.4-&gt;daphne&gt;=4.0.0-&gt;channels[daphne]&gt;=4.0.0-&gt;mercury) (22.10.0)
+Requirement already satisfied: constantly&gt;=15.1 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from twisted&gt;=22.4-&gt;twisted[tls]&gt;=22.4-&gt;daphne&gt;=4.0.0-&gt;channels[daphne]&gt;=4.0.0-&gt;mercury) (23.10.4)
+Requirement already satisfied: incremental&gt;=22.10.0 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from twisted&gt;=22.4-&gt;twisted[tls]&gt;=22.4-&gt;daphne&gt;=4.0.0-&gt;channels[daphne]&gt;=4.0.0-&gt;mercury) (22.10.0)
+Requirement already satisfied: twisted-iocpsupport&lt;2,&gt;=1.0.2 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from twisted&gt;=22.4-&gt;twisted[tls]&gt;=22.4-&gt;daphne&gt;=4.0.0-&gt;channels[daphne]&gt;=4.0.0-&gt;mercury) (1.0.4)
+Requirement already satisfied: service-identity&gt;=18.1.0 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from twisted[tls]&gt;=22.4-&gt;daphne&gt;=4.0.0-&gt;channels[daphne]&gt;=4.0.0-&gt;mercury) (24.1.0)
+Requirement already satisfied: pyasn1 in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from service-identity&gt;=18.1.0-&gt;twisted[tls]&gt;=22.4-&gt;daphne&gt;=4.0.0-&gt;channels[daphne]&gt;=4.0.0-&gt;mercury) (0.6.0)
+Requirement already satisfied: pyasn1-modules in c:\users\emily\appdata\local\programs\python\python310\lib\site-packages (from service-identity&gt;=18.1.0-&gt;twisted[tls]&gt;=22.4-&gt;daphne&gt;=4.0.0-&gt;channels[daphne]&gt;=4.0.0-&gt;mercury) (0.4.0)
+Note: you may need to restart the kernel to use updated packages.
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
+<pre>WARNING: dj-rest-auth 3.0.0 does not provide the extra 'with-social'
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>Scrape the Home Truths and Quick Fire Lies from the WILTY fandom site</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput">
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>Scraped 8 entries from https://wilty.fandom.com/wiki/Series_1,_Episode_1
 Scraped 6 entries from https://wilty.fandom.com/wiki/Series_1,_Episode_2
 Scraped 7 entries from https://wilty.fandom.com/wiki/Series_1,_Episode_3
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 6 entries from https://wilty.fandom.com/wiki/Series_1,_Episode_4
+Scraped 6 entries from https://wilty.fandom.com/wiki/Series_1,_Episode_4
 Scraped 9 entries from https://wilty.fandom.com/wiki/Series_1,_Episode_5
 Scraped 5 entries from https://wilty.fandom.com/wiki/Series_1,_Episode_6
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 7 entries from https://wilty.fandom.com/wiki/Series_2,_Episode_1
+Scraped 7 entries from https://wilty.fandom.com/wiki/Series_2,_Episode_1
 Scraped 6 entries from https://wilty.fandom.com/wiki/Series_2,_Episode_2
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_2,_Episode_3
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 6 entries from https://wilty.fandom.com/wiki/Series_2,_Episode_4
+Scraped 6 entries from https://wilty.fandom.com/wiki/Series_2,_Episode_4
 Scraped 6 entries from https://wilty.fandom.com/wiki/Series_2,_Episode_5
 Scraped 7 entries from https://wilty.fandom.com/wiki/Series_2,_Episode_6
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 7 entries from https://wilty.fandom.com/wiki/Series_2,_Episode_7
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 7 entries from https://wilty.fandom.com/wiki/Series_2,_Episode_8
+Scraped 7 entries from https://wilty.fandom.com/wiki/Series_2,_Episode_7
+Scraped 7 entries from https://wilty.fandom.com/wiki/Series_2,_Episode_8
 Scraped 9 entries from https://wilty.fandom.com/wiki/Series_2,_Episode_9
 Scraped 5 entries from https://wilty.fandom.com/wiki/Series_3,_Episode_1
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 1 entries from https://wilty.fandom.com/wiki/Series_3,_Episode_2
+Scraped 1 entries from https://wilty.fandom.com/wiki/Series_3,_Episode_2
 Scraped 5 entries from https://wilty.fandom.com/wiki/Series_3,_Episode_3
 Scraped 6 entries from https://wilty.fandom.com/wiki/Series_3,_Episode_4
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 5 entries from https://wilty.fandom.com/wiki/Series_3,_Episode_5
+Scraped 5 entries from https://wilty.fandom.com/wiki/Series_3,_Episode_5
 Scraped 5 entries from https://wilty.fandom.com/wiki/Series_3,_Episode_6
 Scraped 6 entries from https://wilty.fandom.com/wiki/Series_3,_Episode_7
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 6 entries from https://wilty.fandom.com/wiki/Series_3,_Episode_8
+Scraped 6 entries from https://wilty.fandom.com/wiki/Series_3,_Episode_8
 Scraped 8 entries from https://wilty.fandom.com/wiki/Series_3,_Episode_9
 Scraped 5 entries from https://wilty.fandom.com/wiki/Series_4,_Episode_1
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 6 entries from https://wilty.fandom.com/wiki/Series_4,_Episode_2
+Scraped 6 entries from https://wilty.fandom.com/wiki/Series_4,_Episode_2
 Scraped 5 entries from https://wilty.fandom.com/wiki/Series_4,_Episode_3
 Scraped 6 entries from https://wilty.fandom.com/wiki/Series_4,_Episode_4
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 5 entries from https://wilty.fandom.com/wiki/Series_4,_Episode_5
+Scraped 5 entries from https://wilty.fandom.com/wiki/Series_4,_Episode_5
 Scraped 5 entries from https://wilty.fandom.com/wiki/Series_4,_Episode_6
 Scraped 6 entries from https://wilty.fandom.com/wiki/Series_4,_Episode_7
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 5 entries from https://wilty.fandom.com/wiki/Series_4,_Episode_8
+Scraped 5 entries from https://wilty.fandom.com/wiki/Series_4,_Episode_8
 Scraped 6 entries from https://wilty.fandom.com/wiki/Series_4,_Episode_9
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_5,_Episode_1
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 6 entries from https://wilty.fandom.com/wiki/Series_5,_Episode_2
+Scraped 6 entries from https://wilty.fandom.com/wiki/Series_5,_Episode_2
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_5,_Episode_3
 Scraped 6 entries from https://wilty.fandom.com/wiki/Series_5,_Episode_4
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 5 entries from https://wilty.fandom.com/wiki/Series_5,_Episode_5
+Scraped 5 entries from https://wilty.fandom.com/wiki/Series_5,_Episode_5
 Scraped 5 entries from https://wilty.fandom.com/wiki/Series_5,_Episode_6
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 5 entries from https://wilty.fandom.com/wiki/Series_5,_Episode_7
+Scraped 5 entries from https://wilty.fandom.com/wiki/Series_5,_Episode_7
 Scraped 5 entries from https://wilty.fandom.com/wiki/Series_5,_Episode_8
 Scraped 5 entries from https://wilty.fandom.com/wiki/Series_5,_Episode_9
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 4 entries from https://wilty.fandom.com/wiki/Series_6,_Episode_1
+Scraped 4 entries from https://wilty.fandom.com/wiki/Series_6,_Episode_1
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_6,_Episode_2
 Scraped 5 entries from https://wilty.fandom.com/wiki/Series_6,_Episode_3
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 5 entries from https://wilty.fandom.com/wiki/Series_6,_Episode_4
+Scraped 5 entries from https://wilty.fandom.com/wiki/Series_6,_Episode_4
 Scraped 5 entries from https://wilty.fandom.com/wiki/Series_6,_Episode_5
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_6,_Episode_6
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 4 entries from https://wilty.fandom.com/wiki/Series_6,_Episode_7
+Scraped 4 entries from https://wilty.fandom.com/wiki/Series_6,_Episode_7
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_6,_Episode_8
 Scraped 9 entries from https://wilty.fandom.com/wiki/Series_6,_Episode_9
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 4 entries from https://wilty.fandom.com/wiki/Series_7,_Episode_1
+Scraped 4 entries from https://wilty.fandom.com/wiki/Series_7,_Episode_1
 Scraped 5 entries from https://wilty.fandom.com/wiki/Series_7,_Episode_2
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_7,_Episode_3
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 3 entries from https://wilty.fandom.com/wiki/Series_7,_Episode_4
+Scraped 3 entries from https://wilty.fandom.com/wiki/Series_7,_Episode_4
 Scraped 5 entries from https://wilty.fandom.com/wiki/Series_7,_Episode_5
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_7,_Episode_6
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 4 entries from https://wilty.fandom.com/wiki/Series_7,_Episode_7
+Scraped 4 entries from https://wilty.fandom.com/wiki/Series_7,_Episode_7
 Scraped 5 entries from https://wilty.fandom.com/wiki/Series_7,_Episode_8
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 9 entries from https://wilty.fandom.com/wiki/Series_7,_Episode_9
+Scraped 9 entries from https://wilty.fandom.com/wiki/Series_7,_Episode_9
 Scraped 6 entries from https://wilty.fandom.com/wiki/Series_7,_Episode_10
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_8,_Episode_1
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 4 entries from https://wilty.fandom.com/wiki/Series_8,_Episode_2
+Scraped 4 entries from https://wilty.fandom.com/wiki/Series_8,_Episode_2
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_8,_Episode_3
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_8,_Episode_4
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 4 entries from https://wilty.fandom.com/wiki/Series_8,_Episode_5
+Scraped 4 entries from https://wilty.fandom.com/wiki/Series_8,_Episode_5
 Scraped 5 entries from https://wilty.fandom.com/wiki/Series_8,_Episode_6
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_8,_Episode_7
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 5 entries from https://wilty.fandom.com/wiki/Series_8,_Episode_8
+Scraped 5 entries from https://wilty.fandom.com/wiki/Series_8,_Episode_8
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_8,_Episode_9
 Scraped 9 entries from https://wilty.fandom.com/wiki/Series_8,_Episode_10
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 5 entries from https://wilty.fandom.com/wiki/Series_9,_Episode_1
+Scraped 5 entries from https://wilty.fandom.com/wiki/Series_9,_Episode_1
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_9,_Episode_2
 Scraped 3 entries from https://wilty.fandom.com/wiki/Series_9,_Episode_3
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 4 entries from https://wilty.fandom.com/wiki/Series_9,_Episode_4
+Scraped 4 entries from https://wilty.fandom.com/wiki/Series_9,_Episode_4
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_9,_Episode_5
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_9,_Episode_6
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 4 entries from https://wilty.fandom.com/wiki/Series_9,_Episode_7
+Scraped 4 entries from https://wilty.fandom.com/wiki/Series_9,_Episode_7
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_9,_Episode_8
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_9,_Episode_9
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 7 entries from https://wilty.fandom.com/wiki/Series_9,_Episode_10
+Scraped 7 entries from https://wilty.fandom.com/wiki/Series_9,_Episode_10
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_10,_Episode_1
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_10,_Episode_2
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 4 entries from https://wilty.fandom.com/wiki/Series_10,_Episode_3
+Scraped 4 entries from https://wilty.fandom.com/wiki/Series_10,_Episode_3
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_10,_Episode_4
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_10,_Episode_5
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 4 entries from https://wilty.fandom.com/wiki/Series_10,_Episode_6
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 4 entries from https://wilty.fandom.com/wiki/Series_10,_Episode_7
+Scraped 4 entries from https://wilty.fandom.com/wiki/Series_10,_Episode_6
+Scraped 4 entries from https://wilty.fandom.com/wiki/Series_10,_Episode_7
 Scraped 5 entries from https://wilty.fandom.com/wiki/Series_10,_Episode_8
 Scraped 9 entries from https://wilty.fandom.com/wiki/Series_10,_Episode_9
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 5 entries from https://wilty.fandom.com/wiki/Series_10,_Episode_10
+Scraped 5 entries from https://wilty.fandom.com/wiki/Series_10,_Episode_10
 Scraped 3 entries from https://wilty.fandom.com/wiki/Series_11,_Episode_1
 Scraped 3 entries from https://wilty.fandom.com/wiki/Series_11,_Episode_2
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 3 entries from https://wilty.fandom.com/wiki/Series_11,_Episode_3
+Scraped 3 entries from https://wilty.fandom.com/wiki/Series_11,_Episode_3
 Scraped 3 entries from https://wilty.fandom.com/wiki/Series_11,_Episode_4
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_11,_Episode_5
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 4 entries from https://wilty.fandom.com/wiki/Series_11,_Episode_6
+Scraped 4 entries from https://wilty.fandom.com/wiki/Series_11,_Episode_6
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_11,_Episode_7
 Scraped 3 entries from https://wilty.fandom.com/wiki/Series_11,_Episode_8
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 4 entries from https://wilty.fandom.com/wiki/Series_11,_Episode_9
+Scraped 4 entries from https://wilty.fandom.com/wiki/Series_11,_Episode_9
 Scraped 8 entries from https://wilty.fandom.com/wiki/Series_11,_Episode_10
 Scraped 3 entries from https://wilty.fandom.com/wiki/Series_12,_Episode_1
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 4 entries from https://wilty.fandom.com/wiki/Series_12,_Episode_2
+Scraped 4 entries from https://wilty.fandom.com/wiki/Series_12,_Episode_2
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_12,_Episode_3
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_12,_Episode_4
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 4 entries from https://wilty.fandom.com/wiki/Series_12,_Episode_5
+Scraped 4 entries from https://wilty.fandom.com/wiki/Series_12,_Episode_5
 Scraped 3 entries from https://wilty.fandom.com/wiki/Series_12,_Episode_6
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_12,_Episode_7
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 4 entries from https://wilty.fandom.com/wiki/Series_12,_Episode_8
+Scraped 4 entries from https://wilty.fandom.com/wiki/Series_12,_Episode_8
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_12,_Episode_9
 Scraped 8 entries from https://wilty.fandom.com/wiki/Series_12,_Episode_10
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 6 entries from https://wilty.fandom.com/wiki/Series_12,_Episode_11
+Scraped 6 entries from https://wilty.fandom.com/wiki/Series_12,_Episode_11
 Scraped 3 entries from https://wilty.fandom.com/wiki/Series_13,_Episode_1
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_13,_Episode_2
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 5 entries from https://wilty.fandom.com/wiki/Series_13,_Episode_3
+Scraped 5 entries from https://wilty.fandom.com/wiki/Series_13,_Episode_3
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_13,_Episode_4
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 3 entries from https://wilty.fandom.com/wiki/Series_13,_Episode_5
+Scraped 3 entries from https://wilty.fandom.com/wiki/Series_13,_Episode_5
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_13,_Episode_6
 Scraped 5 entries from https://wilty.fandom.com/wiki/Series_13,_Episode_7
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 4 entries from https://wilty.fandom.com/wiki/Series_13,_Episode_8
+Scraped 4 entries from https://wilty.fandom.com/wiki/Series_13,_Episode_8
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_13,_Episode_9
 Scraped 5 entries from https://wilty.fandom.com/wiki/Series_13,_Episode_10
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 8 entries from https://wilty.fandom.com/wiki/Series_13,_Episode_11
+Scraped 8 entries from https://wilty.fandom.com/wiki/Series_13,_Episode_11
 Scraped 7 entries from https://wilty.fandom.com/wiki/Series_13,_Episode_12
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_14,_Episode_1
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 5 entries from https://wilty.fandom.com/wiki/Series_14,_Episode_2
+Scraped 5 entries from https://wilty.fandom.com/wiki/Series_14,_Episode_2
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_14,_Episode_3
 Scraped 5 entries from https://wilty.fandom.com/wiki/Series_14,_Episode_4
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 5 entries from https://wilty.fandom.com/wiki/Series_14,_Episode_5
+Scraped 5 entries from https://wilty.fandom.com/wiki/Series_14,_Episode_5
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_14,_Episode_6
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_14,_Episode_7
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 4 entries from https://wilty.fandom.com/wiki/Series_14,_Episode_8
+Scraped 4 entries from https://wilty.fandom.com/wiki/Series_14,_Episode_8
 Scraped 5 entries from https://wilty.fandom.com/wiki/Series_14,_Episode_9
 Scraped 5 entries from https://wilty.fandom.com/wiki/Series_14,_Episode_10
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 10 entries from https://wilty.fandom.com/wiki/Series_14,_Episode_11
+Scraped 10 entries from https://wilty.fandom.com/wiki/Series_14,_Episode_11
 Scraped 8 entries from https://wilty.fandom.com/wiki/Series_14,_Episode_12
 Scraped 6 entries from https://wilty.fandom.com/wiki/Series_15,_Episode_1
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 5 entries from https://wilty.fandom.com/wiki/Series_15,_Episode_2
+Scraped 5 entries from https://wilty.fandom.com/wiki/Series_15,_Episode_2
 Scraped 5 entries from https://wilty.fandom.com/wiki/Series_15,_Episode_3
 Scraped 6 entries from https://wilty.fandom.com/wiki/Series_15,_Episode_4
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 5 entries from https://wilty.fandom.com/wiki/Series_15,_Episode_5
+Scraped 5 entries from https://wilty.fandom.com/wiki/Series_15,_Episode_5
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_15,_Episode_6
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 5 entries from https://wilty.fandom.com/wiki/Series_15,_Episode_7
+Scraped 5 entries from https://wilty.fandom.com/wiki/Series_15,_Episode_7
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_15,_Episode_8
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_15,_Episode_9
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 5 entries from https://wilty.fandom.com/wiki/Series_15,_Episode_10
+Scraped 5 entries from https://wilty.fandom.com/wiki/Series_15,_Episode_10
 Scraped 8 entries from https://wilty.fandom.com/wiki/Series_15,_Episode_11
 Scraped 7 entries from https://wilty.fandom.com/wiki/Series_15,_Episode_12
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 4 entries from https://wilty.fandom.com/wiki/Series_16,_Episode_1
+Scraped 4 entries from https://wilty.fandom.com/wiki/Series_16,_Episode_1
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_16,_Episode_2
 Scraped 3 entries from https://wilty.fandom.com/wiki/Series_16,_Episode_3
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 4 entries from https://wilty.fandom.com/wiki/Series_16,_Episode_4
+Scraped 4 entries from https://wilty.fandom.com/wiki/Series_16,_Episode_4
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_16,_Episode_5
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 4 entries from https://wilty.fandom.com/wiki/Series_16,_Episode_6
+Scraped 4 entries from https://wilty.fandom.com/wiki/Series_16,_Episode_6
 Scraped 3 entries from https://wilty.fandom.com/wiki/Series_16,_Episode_7
 Scraped 2 entries from https://wilty.fandom.com/wiki/Series_16,_Episode_8
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 4 entries from https://wilty.fandom.com/wiki/Series_16,_Episode_9
+Scraped 4 entries from https://wilty.fandom.com/wiki/Series_16,_Episode_9
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_16,_Episode_10
 Scraped 7 entries from https://wilty.fandom.com/wiki/Series_16,_Episode_11
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 9 entries from https://wilty.fandom.com/wiki/Series_16,_Episode_12
+Scraped 9 entries from https://wilty.fandom.com/wiki/Series_16,_Episode_12
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_17,_Episode_1
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_17,_Episode_2
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 4 entries from https://wilty.fandom.com/wiki/Series_17,_Episode_3
+Scraped 4 entries from https://wilty.fandom.com/wiki/Series_17,_Episode_3
 Scraped 4 entries from https://wilty.fandom.com/wiki/Series_17,_Episode_4
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Scraped 4 entries from https://wilty.fandom.com/wiki/Series_17,_Episode_5
+Scraped 4 entries from https://wilty.fandom.com/wiki/Series_17,_Episode_5
 Scraping completed.
 </pre>
 </div>
@@ -8109,34 +7871,17 @@ Scraping completed.
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p>Check the output is a list of items in the format ('Name: "Quote" - True/Lie', True/False)</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [2]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Print the first 10 items of new_data</span>
-<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">all_data</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput">
 <div class="jp-Cell-outputWrapper">
 <div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>('Dom Joly: "I was at school with Osama bin Laden." — True', True)
 ('Duncan Bannatyne: "When I ran my last public company, I banned all my staff from buying paper clips." — True', True)
@@ -8158,84 +7903,28 @@ Scraping completed.
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p>Clean the data and split the name and the quote</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [3]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">get_quote</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
-    <span class="n">separators</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'—'</span><span class="p">,</span> <span class="s1">'–'</span><span class="p">,</span> <span class="s1">'-'</span><span class="p">,</span> <span class="s1">'â€“'</span><span class="p">]</span>
-    <span class="k">for</span> <span class="n">sep</span> <span class="ow">in</span> <span class="n">separators</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">sep</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">'"'</span><span class="p">,</span> <span class="s1">''</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">str</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">'Lie'</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">str</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">'"'</span><span class="p">,</span> <span class="s1">''</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">str</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">'Truth'</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">str</span><span class="p">[:</span><span class="o">-</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">'"'</span><span class="p">,</span> <span class="s1">''</span><span class="p">)</span>
-    <span class="k">return</span> <span class="kc">None</span>
-
-<span class="k">def</span> <span class="nf">extract</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="k">if</span> <span class="s2">":"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> 
-            <span class="k">return</span> <span class="kc">None</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">":"</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">quote</span> <span class="o">=</span> <span class="n">get_quote</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">":"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
-        <span class="k">if</span> <span class="n">quote</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">name</span><span class="p">,</span> <span class="n">quote</span><span class="p">,</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-    <span class="k">except</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
-        <span class="k">return</span> <span class="kc">None</span>
-
-<span class="n">new_all_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">extract</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">all_data</span><span class="p">]</span>
-<span class="n">new_all_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">new_all_data</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs jp-mod-noInput">
 </div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p>Check the output is a list of items of the format ('Name', 'Quote', True/False)</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [4]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Print the first 10 items of new_all_data</span>
-<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">new_all_data</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput">
 <div class="jp-Cell-outputWrapper">
 <div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>('Dom Joly', 'I was at school with Osama bin Laden.', True)
 ('Duncan Bannatyne', 'When I ran my last public company, I banned all my staff from buying paper clips.', True)
@@ -8257,49 +7946,17 @@ Scraping completed.
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p>Train a classifier to predict whether a statement is a truth or a lie</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [5]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.feature_extraction.text</span> <span class="kn">import</span> <span class="n">TfidfVectorizer</span>
-<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LogisticRegression</span>
-<span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">dump</span>
-
-<span class="c1"># Prepare data</span>
-<span class="n">names</span><span class="p">,</span> <span class="n">quotes</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">new_all_data</span><span class="p">)</span>
-<span class="n">quotes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">quotes</span><span class="p">)</span>
-<span class="n">labels</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
-
-<span class="n">vectorizer</span> <span class="o">=</span> <span class="n">TfidfVectorizer</span><span class="p">(</span><span class="n">max_df</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">min_df</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">use_idf</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="s1">'l2'</span><span class="p">,</span> <span class="n">binary</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sublinear_tf</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">X</span> <span class="o">=</span> <span class="n">vectorizer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">quotes</span><span class="p">)</span>
-
-<span class="c1"># Model</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
-<span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
-
-<span class="n">dump</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">'model.joblib'</span><span class="p">)</span>
-<span class="n">dump</span><span class="p">(</span><span class="n">vectorizer</span><span class="p">,</span> <span class="s1">'vectorizer.joblib'</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput">
 <div class="jp-Cell-outputWrapper">
 <div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[5]:</div>
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
 <pre>['vectorizer.joblib']</pre>
 </div>
@@ -8311,51 +7968,29 @@ Scraping completed.
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>Convert the Jupyter notebook into an interactive Mercury Webapp</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs jp-mod-noInput">
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p>Use an explainable AI (XAI) technique to visualise why a statement is true/false</p>
 <p>LIME is a technique that can explain the predictions of any classifier or regressor in a faithful way, by approximating it locally with an interpretable model. For text data, LIME explains predictions by creating a new dataset consisting of perturbed samples around the instance being explained. It then trains a simple model on this new dataset and uses the coefficients of the model to show the contribution of each feature</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [6]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">lime</span>
-<span class="kn">import</span> <span class="nn">lime.lime_text</span>
-<span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="kn">import</span> <span class="n">make_pipeline</span>
-<span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">load</span>
-
-<span class="n">model</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s1">'model.joblib'</span><span class="p">)</span>
-<span class="n">vectorizer</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s1">'vectorizer.joblib'</span><span class="p">)</span>
-
-<span class="c1"># Create a LimeTextExplainer</span>
-<span class="n">explainer</span> <span class="o">=</span> <span class="n">lime</span><span class="o">.</span><span class="n">lime_text</span><span class="o">.</span><span class="n">LimeTextExplainer</span><span class="p">(</span><span class="n">class_names</span><span class="o">=</span><span class="p">[</span><span class="s1">'False'</span><span class="p">,</span> <span class="s1">'True'</span><span class="p">])</span>
-
-<span class="c1"># Use your model and vectorizer</span>
-<span class="n">c</span> <span class="o">=</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">vectorizer</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
-
-<span class="n">new_quote</span> <span class="o">=</span> <span class="s2">"For the past fifteen years, I have performed my own dentistry"</span>
-
-<span class="c1"># Explanation for a specific text instance</span>
-<span class="n">exp</span> <span class="o">=</span> <span class="n">explainer</span><span class="o">.</span><span class="n">explain_instance</span><span class="p">(</span><span class="n">new_quote</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">,</span> <span class="n">num_features</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-<span class="n">exp</span><span class="o">.</span><span class="n">show_in_notebook</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput">
 <div class="jp-Cell-outputWrapper">
 <div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
 <html>
 <meta content="text/html; charset=utf-8" http-equiv="content-type"/>
@@ -45448,9 +45083,9 @@ Scraping completed.
 /***/ })
 /******/ ]);
 //# sourceMappingURL=bundle.js.map </script></head><body>
-<div class="lime top_div" id="top_divHSQI3P5ZS31C5OC"></div>
+<div class="lime top_div" id="top_divGDYGWSEN5RAP1NB"></div>
 <script>
-        var top_div = d3.select('#top_divHSQI3P5ZS31C5OC').classed('lime top_div', true);
+        var top_div = d3.select('#top_divGDYGWSEN5RAP1NB').classed('lime top_div', true);
         
             var pp_div = top_div.append('div')
                                 .classed('lime predict_proba', true);
@@ -45462,10 +45097,10 @@ Scraping completed.
             var exp = new lime.Explanation(["False", "True"]);
         
                 exp_div = top_div.append('div').classed('lime explanation', true);
-                exp.show([["years", 0.12037887444851703], ["past", 0.09206342449434363], ["own", -0.06824290846192997], ["the", -0.04720673591194015], ["have", -0.026012968760742494], ["For", -0.008697105080910188], ["my", 0.001989856685024046], ["performed", 0.0018760567935876347], ["fifteen", -0.0009593707247929087], ["I", 0.0006360922381363504]], 1, exp_div);
+                exp.show([["years", 0.11903911611268837], ["past", 0.09090345260787133], ["own", -0.06854914306669946], ["the", -0.046746713399480985], ["have", -0.02662195827629407], ["For", -0.008180597041095406], ["my", 0.0031761041050858275], ["I", 0.0005251077635311688], ["performed", 0.00020849213909090067], ["fifteen", 0.00011863008135463979]], 1, exp_div);
                 
         var raw_div = top_div.append('div');
-            exp.show_raw_text([["years", 21, 0.12037887444851703], ["past", 8, 0.09206342449434363], ["own", 48, -0.06824290846192997], ["the", 4, -0.04720673591194015], ["have", 30, -0.026012968760742494], ["For", 0, -0.008697105080910188], ["my", 45, 0.001989856685024046], ["performed", 35, 0.0018760567935876347], ["fifteen", 13, -0.0009593707247929087], ["I", 28, 0.0006360922381363504]], 1, "For the past fifteen years, I have performed my own dentistry", raw_div, true);
+            exp.show_raw_text([["years", 21, 0.11903911611268837], ["past", 8, 0.09090345260787133], ["own", 48, -0.06854914306669946], ["the", 4, -0.046746713399480985], ["have", 30, -0.02662195827629407], ["For", 0, -0.008180597041095406], ["my", 45, 0.0031761041050858275], ["I", 28, 0.0005251077635311688], ["performed", 35, 0.00020849213909090067], ["fifteen", 13, 0.00011863008135463979]], 1, "For the past fifteen years, I have performed my own dentistry.", raw_div, true);
             
         </script>
 </body></html>
